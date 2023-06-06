@@ -7,20 +7,28 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 
 import { Moment } from "moment";
+import { InjectedProps } from "material-ui-popup-state";
 
 interface PropsType {
   children: JSX.Element;
   setDate: React.Dispatch<React.SetStateAction<string>>;
+  closeOnSelect: boolean;
 }
 
-function Calendar({ children, setDate }: PropsType) {
-  const setDateValue = (selectedDate: Moment | null) => {
+function Calendar({ children, setDate, closeOnSelect = true }: PropsType) {
+  const setDateValue = (
+    selectedDate: Moment | null,
+    popupState: InjectedProps
+  ) => {
     if (!selectedDate) return;
-    setDate(selectedDate.format("Do MMM YYYY"));
+    else {
+      setDate(selectedDate.format("Do MMM YYYY"));
+      if (closeOnSelect) popupState.setOpen(false);
+    }
   };
   return (
     <PopupState variant="popover" popupId="demo-popup-popover">
-      {(popupState) => (
+      {(popupState: InjectedProps) => (
         <>
           <div {...bindTrigger(popupState)}>{children}</div>
           <Popover
@@ -35,7 +43,11 @@ function Calendar({ children, setDate }: PropsType) {
             }}
           >
             <LocalizationProvider dateAdapter={AdapterMoment}>
-              <DateCalendar onChange={setDateValue} />
+              <DateCalendar
+                onChange={(selectedDate: Moment | null) => {
+                  setDateValue(selectedDate, popupState);
+                }}
+              />
             </LocalizationProvider>
           </Popover>
         </>
