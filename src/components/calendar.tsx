@@ -14,33 +14,48 @@ interface PropsType {
 }
 
 function Calendar({ children, setDate }: PropsType) {
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
   const setDateValue = (selectedDate: Moment | null) => {
     if (!selectedDate) return;
     setDate(selectedDate.format("Do MMM YYYY"));
   };
   return (
-    <PopupState variant="popover" popupId="demo-popup-popover">
-      {(popupState) => (
-        <>
-          <div {...bindTrigger(popupState)}>{children}</div>
-          <Popover
-            {...bindPopover(popupState)}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-          >
-            <LocalizationProvider dateAdapter={AdapterMoment}>
-              <DateCalendar onChange={setDateValue} />
-            </LocalizationProvider>
-          </Popover>
-        </>
-      )}
-    </PopupState>
+    <>
+      <div onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose}>
+        {children}
+      </div>
+      <Popover
+        id="mouse-over-popover"
+        sx={{
+          pointerEvents: "none",
+        }}
+        open={open}
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <LocalizationProvider dateAdapter={AdapterMoment}>
+          <DateCalendar onChange={setDateValue} />
+        </LocalizationProvider>
+      </Popover>
+    </>
   );
 }
 
